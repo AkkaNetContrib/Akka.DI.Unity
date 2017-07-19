@@ -18,7 +18,7 @@ namespace Akka.DI.Unity
     /// Provides services to the <see cref="ActorSystem "/> extension system
     /// used to create actors using the Unity IoC container.
     /// </summary>
-    public class UnityDependencyResolver : IDependencyResolver
+    public class UnityDependencyResolver : IDependencyResolver, INoSerializationVerificationNeeded
     {
         private IUnityContainer container;
         private ConcurrentDictionary<string, Type> typeCache;
