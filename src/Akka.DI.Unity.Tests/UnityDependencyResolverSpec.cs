@@ -5,12 +5,13 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-using System;
-using System.Diagnostics;
 using Akka.Actor;
 using Akka.DI.Core;
 using Akka.DI.TestKit;
-using Microsoft.Practices.Unity;
+using System;
+using System.Diagnostics;
+using Unity;
+using Unity.Lifetime;
 
 namespace Akka.DI.Unity.Tests
 {
@@ -30,7 +31,7 @@ namespace Akka.DI.Unity.Tests
         protected override void Bind<T>(object diContainer, Func<T> generator)
         {
             var unityContainer = ToContainer(diContainer);
-            unityContainer.RegisterType<T>(new HierarchicalLifetimeManager(), new InjectionFactory(ctx => generator()));
+            unityContainer.RegisterFactory<T>(ctx => generator(), new HierarchicalLifetimeManager());
         }
 
         protected override void Bind<T>(object diContainer)
