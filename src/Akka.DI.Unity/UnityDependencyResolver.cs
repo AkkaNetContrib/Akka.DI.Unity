@@ -5,12 +5,12 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
+using Akka.Actor;
+using Akka.DI.Core;
 using System;
 using System.Collections.Concurrent;
 using System.Runtime.CompilerServices;
-using Akka.Actor;
-using Akka.DI.Core;
-using Microsoft.Practices.Unity;
+using Unity;
 
 namespace Akka.DI.Unity
 {
@@ -20,10 +20,10 @@ namespace Akka.DI.Unity
     /// </summary>
     public class UnityDependencyResolver : IDependencyResolver, INoSerializationVerificationNeeded
     {
-        private IUnityContainer container;
-        private ConcurrentDictionary<string, Type> typeCache;
-        private ActorSystem system;
-        private ConditionalWeakTable<ActorBase, IUnityContainer> references;
+        private readonly IUnityContainer container;
+        private readonly ConcurrentDictionary<string, Type> typeCache;
+        private readonly ActorSystem system;
+        private readonly ConditionalWeakTable<ActorBase, IUnityContainer> references;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="UnityDependencyResolver"/> class.
@@ -35,11 +35,9 @@ namespace Akka.DI.Unity
         /// </exception>
         public UnityDependencyResolver(IUnityContainer container, ActorSystem system)
         {
-            if (system == null) throw new ArgumentNullException("system");
-            if (container == null) throw new ArgumentNullException("container");
-            this.container = container;
+            this.container = container ?? throw new ArgumentNullException("container");
             typeCache = new ConcurrentDictionary<string, Type>(StringComparer.InvariantCultureIgnoreCase);
-            this.system = system;
+            this.system = system ?? throw new ArgumentNullException("system");
             this.system.AddDependencyResolver(this);
             this.references = new ConditionalWeakTable<ActorBase, IUnityContainer>();
         }
@@ -98,9 +96,7 @@ namespace Akka.DI.Unity
         /// <param name="actor">The actor to remove from the container</param>
         public void Release(ActorBase actor)
         {
-            IUnityContainer childContainer;
-
-            if (references.TryGetValue(actor, out childContainer))
+            if (references.TryGetValue(actor, out IUnityContainer childContainer))
             {
                 childContainer.Dispose();
                 references.Remove(actor);
